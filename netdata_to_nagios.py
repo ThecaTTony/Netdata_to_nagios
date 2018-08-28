@@ -3,8 +3,8 @@
 # Script Description :  Nagios/Shinken/Centreon/Icinga script for
 #                        alerting via netdata source
 # Author:   Guillaume Seigneuret
-# Date:     08/05/2016
-# Version:  1.0
+# Date:     2018/08/28
+# Version:  2.0
 #
 # Usage:        Utilisation:
 #    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-c <90>] [-w <80>]
@@ -42,7 +42,7 @@
 # Config file:  None
 #
 # Prerequisites:
-#        - Python 2.7
+#        - Python 3.7
 #        - Netdata on client side
 # ####################################################################
 # GPL v3
@@ -63,7 +63,7 @@
 import os, sys, getopt
 import json
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import pprint
 
 def usage():
@@ -149,17 +149,17 @@ def init_datastruct(warn,crit):
 def get_simple_datasource(hostaddress,port,datasource,interval):
     URL = ""
     if (abs(int(interval)) < 1) or (abs(int(interval)) > 3600):
-        print "Interval problem, should be between 1 and 3600: " + interval
+        print("Interval problem, should be between 1 and 3600: " + interval)
         return None
 
     URL = 'http://'+hostaddress+':'+port+'/api/v1/data?chart='+datasource+'&after='+interval+'&options=seconds'
 
-    req = urllib2.Request(URL)
+    req = urllib.request.Request(URL)
 
     try:
-        res = urllib2.urlopen(req, timeout=3)
+        res = urllib.request.urlopen(req, timeout=3)
     except IOError:
-        print "Unable to connect to netdata node, or datasource unknown :("
+        print("Unable to connect to netdata node, or datasource unknown :(")
         sys.exit(3)
 
     return json.loads(res.read())
@@ -670,7 +670,7 @@ def main(argv):
     try:
             opts, args = getopt.getopt(argv,"hD:i:w:c:H:p:",["help","datasource=","interval=","warning=","critical=","host=","port="])
     except getopt.GetoptError:
-            print usage()
+            print(usage())
             sys.exit(3)
     hostaddress = '127.0.0.1'
     port = '19999'
@@ -679,7 +679,7 @@ def main(argv):
 
     for opt, arg in opts:
         if opt in ('-h', "--help"):
-            print usage()
+            print(usage())
             sys.exit(4)
         elif opt in ("-c", "--critical"):
             critical = arg
@@ -697,21 +697,21 @@ def main(argv):
     try:
         warning
     except NameError:
-        print "Missing warning threshold !"
-        print usage()
+        print("Missing warning threshold !")
+        print(usage())
         sys.exit(3)
 
     try:
         critical
     except NameError:
-        print "Missing critical threshold !"
-        print usage()
+        print("Missing critical threshold !")
+        print(usage())
         sys.exit(3)
 
     return_values = analyze_from_datasource(hostaddress,port,datasource,interval,warning,critical)
     if return_values is None:
         sys.exit(3)
-    print return_values['output']
+    print(return_values['output'])
     sys.exit(return_values['code'])
 
 if __name__ == "__main__":
