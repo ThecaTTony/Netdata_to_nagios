@@ -26,7 +26,7 @@ It also gives perfdata for long time metrology.
 
 <a name="install"></a>
 ### Install and Config
-The plugin only needs Python 2.7, no additional dependancy/module.
+The plugin only needs Python 3.7, no additional dependancy/module.
 It as only be tested on Linux but should perferctly works on other Unix and Windows systems since there is no operating system commands or operating system specific call.
 
 
